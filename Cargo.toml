@@ -1,0 +1,15 @@
+[package]
+name = "hyper-socks"
+version = "0.1.0"
+authors = ["Arsenii Lyashenko <arsenylyashenko.3@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hyper = "0.12"
+socks = "0.3"
+futures = "0.1"
+tokio = "0.1"
+
+[dev-dependencies]
+hyper-tls = "0.3"
+native-tls = "0.2"

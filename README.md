@@ -1,0 +1,15 @@
+# hyper-socks2
+[![Build Status](https://travis-ci.org/ark0f/hyper-socks2.svg?branch=master)](https://travis-ci.org/ark0f/hyper-socks2)
+[![License](https://img.shields.io/crates/l/hyper-socks2.svg)](https://github.com/ark0f/hyper-socks2/blob/master/LICENSE.md)
+[![crates.io](https://img.shields.io/crates/v/hyper-socks2.svg)]()
+[![API docs](https://docs.rs/hyper-socks2/badge.svg)](https://docs.rs/hyper-socks2)
+
+Reborn of SOCKS4/5 connector for Hyper library
+
+# License
+hyper-socks under either of:
+
+* [Apache License 2.0]([LICENSE](https://github.com/ark0f/hyper-socks2/blob/master/LICENSE-APACHE.md))
+* [MIT](https://github.com/ark0f/hyper-socks2/blob/master/LICENSE.md)
+
+at your option.

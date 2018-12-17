@@ -1,8 +1,15 @@
 [package]
-name = "hyper-socks"
+name = "hyper-socks2"
 version = "0.1.0"
 authors = ["Arsenii Lyashenko <arsenylyashenko.3@gmail.com>"]
+license = "Apache-2.0 OR MIT"
+description = "Reborn of SOCKS4/5 connector for Hyper library"
+repository = "https://github.com/ark0f/hyper-socks"
+documentation = "https://docs.rs/hyper-socks"
 edition = "2018"
+
+[badges]
+travis-ci = { repository = "ark0f/hyper-socks2", branch = "master" }
 
 [dependencies]
 hyper = "0.12"

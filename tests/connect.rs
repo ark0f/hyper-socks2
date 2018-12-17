@@ -1,9 +1,8 @@
 use futures::future::Future;
-use hyper::{client::Client, Body, Uri};
-use hyper_socks::{Auth, Connector as SocksConnector, Proxy};
+use hyper::{client::Client, Body};
+use hyper_socks2::{Auth, Connector as SocksConnector, Proxy};
 use hyper_tls::HttpsConnector;
 use native_tls::TlsConnector;
-use std::{fs, net::ToSocketAddrs};
 use tokio::runtime::current_thread::Runtime;
 
 macro_rules! test {

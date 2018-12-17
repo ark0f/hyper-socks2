@@ -6,6 +6,7 @@ license = "Apache-2.0 OR MIT"
 description = "Reborn of SOCKS4/5 connector for Hyper library"
 repository = "https://github.com/ark0f/hyper-socks"
 documentation = "https://docs.rs/hyper-socks"
+readme = "README.md"
 edition = "2018"
 
 [badges]

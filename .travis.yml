@@ -21,12 +21,13 @@ script:
     - cd 3proxy
     - make -f Makefile.Linux -j4
     - cd bin
-    - echo "
+    - |
+        echo "
         internal 127.0.0.1
         users hyper:CL:proxy
         auth none strong
         socks
-    " > 3proxy.cfg
+        " > 3proxy.cfg
     - ./3proxy 3proxy.cfg &
     - cd ../..
     - cargo build -v --all

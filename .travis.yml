@@ -1,5 +1,7 @@
 language: rust
-cache: cargo
+cache:
+    - cargo
+    - ccache
 rust:
     - stable
     - beta
@@ -7,7 +9,7 @@ rust:
 
 matrix:
     allow_failures:
-        -   rust: nightly
+        - rust: nightly
 
 addons:
     apt:
@@ -19,7 +21,7 @@ addons:
 script:
     - git clone https://github.com/z3APA3A/3proxy
     - cd 3proxy
-    - make -f Makefile.Linux -j4
+    - make -f Makefile.Linux CC='ccache gcc' -j2
     - cd bin
     - |
         echo "

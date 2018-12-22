@@ -7,7 +7,7 @@
 Reborn of SOCKS4/5 connector for Hyper library
 
 # License
-hyper-socks under either of:
+hyper-socks2 under either of:
 
 * [Apache License 2.0](https://github.com/ark0f/hyper-socks2/blob/master/LICENSE-APACHE.md)
 * [MIT](https://github.com/ark0f/hyper-socks2/blob/master/LICENSE-MIT.md)

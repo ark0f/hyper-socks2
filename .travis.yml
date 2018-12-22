@@ -21,7 +21,7 @@ addons:
 script:
     - git clone https://github.com/z3APA3A/3proxy
     - cd 3proxy
-    - make -f Makefile.Linux CC='ccache gcc' -j2
+    - make CC='ccache gcc' -f Makefile.Linux -j2
     - cd bin
     - |
         echo "

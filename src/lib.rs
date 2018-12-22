@@ -1,9 +1,25 @@
+//! Reborn of SOCKS4/5 connector for Hyper library
+//!
+//! # Example
+//! ```no_run
+//! use hyper::{client::Client, Body};
+//! use hyper_socks2::{Connector, Proxy};
+//!
+//! let proxy = Proxy::Socks5 {
+//!     addrs: "your.socks5.proxy:1080",
+//!     auth: None,
+//! };
+//! let connector = Connector::new(proxy);
+//! let client = Client::builder().build::<_, Body>(connector);
+//! ```
+
 use futures::{future, Future, Poll};
 use hyper::client::connect::{Connect, Connected, Destination};
 use socks::{Socks4Stream, Socks5Stream};
 use std::{io, net::ToSocketAddrs};
 use tokio::{net::TcpStream, reactor::Handle};
 
+/// A future with ready TCP stream
 pub struct Connection(Box<Future<Item = (TcpStream, Connected), Error = io::Error> + Send>);
 
 impl Connection {
@@ -24,24 +40,28 @@ impl Future for Connection {
     }
 }
 
+/// A SOCKS4/5 proxy information
 #[derive(Debug)]
 pub enum Proxy<T: ToSocketAddrs> {
     Socks4 { addrs: T, user_id: String },
     Socks5 { addrs: T, auth: Option<Auth> },
 }
 
+/// An authentication information
 #[derive(Debug)]
 pub struct Auth {
     pub user: String,
     pub pass: String,
 }
 
+/// A TCP connector working through proxy
 pub struct Connector<T: ToSocketAddrs>(Proxy<T>);
 
 impl<T> Connector<T>
 where
     T: ToSocketAddrs,
 {
+    /// Create a new connector with a given proxy information
     pub fn new(proxy: Proxy<T>) -> Self {
         Connector(proxy)
     }
@@ -96,7 +116,7 @@ where
         };
         let fut = fut
             .and_then(|stream| TcpStream::from_std(stream, &Handle::default()))
-            .map(|stream| (stream, Connected::new().proxy(true)));
+            .map(|stream| (stream, Connected::new()));
 
         Connection::new(fut)
     }

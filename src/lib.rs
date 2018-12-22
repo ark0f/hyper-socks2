@@ -1,4 +1,4 @@
-//! Reborn of SOCKS4/5 connector for Hyper library
+//! The Reborn of the SOCKS4/5 connector for Hyper library
 //!
 //! # Example
 //! ```no_run

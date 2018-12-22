@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/hyper-socks2.svg)](https://crates.io/crates/hyper-socks2)
 [![API docs](https://docs.rs/hyper-socks2/badge.svg)](https://docs.rs/hyper-socks2)
 
-Reborn of SOCKS4/5 connector for Hyper library
+The Reborn of the SOCKS4/5 connector for Hyper library
 
 # License
 hyper-socks2 under either of:

@@ -55,6 +55,7 @@ pub struct Auth {
 }
 
 /// A TCP connector working through proxy
+#[derive(Debug)]
 pub struct Connector<T: ToSocketAddrs>(Proxy<T>);
 
 impl<T> Connector<T>

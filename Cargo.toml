@@ -1,12 +1,14 @@
 [package]
 name = "hyper-socks2"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Arsenii Lyashenko <arsenylyashenko.3@gmail.com>"]
 license = "Apache-2.0 OR MIT"
 description = "The reborn of the SOCKS4/5 connector for Hyper library"
 repository = "https://github.com/ark0f/hyper-socks2"
 documentation = "https://docs.rs/hyper-socks2"
 readme = "README.md"
+keywords = ["hyper", "network", "ssl", "tls"]
+categories = ["authentication", "network-programming", "web-programming::http-client"]
 edition = "2018"
 
 [badges]

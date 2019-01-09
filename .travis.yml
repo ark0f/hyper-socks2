@@ -19,12 +19,6 @@ addons:
             - gcc
             - libssl-dev
 
-before_cache:
-    - |
-        if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
-            RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install cargo-tarpaulin -f
-        fi
-
 script:
     - git clone https://github.com/z3APA3A/3proxy
     - cd 3proxy
@@ -44,6 +38,7 @@ script:
 
 after_success: |
     if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
+        RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install cargo-tarpaulin -f
         cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
         cargo tarpaulin --out Xml
         bash <(curl -s https://codecov.io/bash)

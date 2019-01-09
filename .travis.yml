@@ -34,7 +34,6 @@ script:
     - ./3proxy 3proxy.cfg &
     - cd ../..
     - cargo build -v --all
-    - cargo test -v --all
 
 after_success: |
     if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
@@ -42,4 +41,6 @@ after_success: |
         cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
         cargo tarpaulin --out Xml
         bash <(curl -s https://codecov.io/bash)
-    fi
+    else
+        cargo test -v --all
+    if

@@ -3,12 +3,12 @@ use hyper::{client::Client, Body};
 use hyper_socks2::{Auth, Connector, Proxy};
 use tokio::runtime::current_thread::Runtime;
 
-macro_rules! test {
+macro_rules! test_url {
     (
         name: $name:ident,
         proxy: $proxy:tt,
         auth: $auth:expr,
-        https: $https:expr,
+        url: $url:expr,
     ) => {
         #[test]
         fn $name() {
@@ -34,19 +34,43 @@ macro_rules! test {
             };
 
             let connector = Connector::with_tls(proxy).unwrap();
-            let scheme = if $https { "https" } else { "http" };
-            let url = format!("{}://google.com", scheme).parse().unwrap();
+            let url = $url.parse().unwrap();
 
             let fut = Client::builder()
                 .build::<_, Body>(connector)
                 .get(url)
-                .map(move |resp| {
-                    assert!(resp.status().is_redirection());
-                });
+                .map(|resp| assert!(resp.status().is_redirection()));
 
             Runtime::new().unwrap().block_on(fut).unwrap();
         }
     };
+}
+
+macro_rules! test {
+    (
+        name: $name:ident,
+        proxy: $proxy:tt,
+        auth: $auth:expr,
+        https: $https:expr,
+    ) => {
+        test_url! {
+            name: $name,
+            proxy: $proxy,
+            auth: $auth,
+            url: if $https {
+                "https://google.com"
+            } else {
+                "http://google.com"
+            },
+        }
+    };
+}
+
+test_url! {
+    name: specified_port,
+    proxy: "socsk4",
+    auth: false,
+    url: "http://google.com:80",
 }
 
 test! {
@@ -89,4 +113,18 @@ test! {
     proxy: "socks5",
     auth: true,
     https: true,
+}
+
+#[test]
+fn missing_port() {
+    let proxy = Proxy::Socks4 {
+        addrs: "127.0.0.1:1080",
+        user_id: "".to_string(),
+    };
+    let connector = Connector::new(proxy);
+    let fut = Client::builder()
+        .build::<_, Body>(connector)
+        .get("not-http://google.com".parse().unwrap())
+        .map_err(|err| assert!(err.is_connect()));
+    assert!(Runtime::new().unwrap().block_on(fut).is_err());
 }

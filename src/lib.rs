@@ -1,16 +1,29 @@
 //! The reborn of the SOCKS4/5 connector for Hyper library
 //!
 //! # Example
-//! ```no_run
+//! ```
 //! use hyper::{client::Client, Body};
 //! use hyper_socks2::{Connector, Proxy};
 //!
+//! # use hyper_socks2::Error;
+//! # fn hidden() -> Result<(), Error> {
 //! let proxy = Proxy::Socks5 {
 //!     addrs: "your.socks5.proxy:1080",
 //!     auth: None,
 //! };
+//!
+//! # let connector = Connector::new(proxy.clone());
+//! # if false {
+//! // HTTP
 //! let connector = Connector::new(proxy);
+//! # } else {
+//! // or HTTPS
+//! let connector = Connector::with_tls(proxy)?;
+//! # }
+//!
 //! let client = Client::builder().build::<_, Body>(connector);
+//! # Ok(())
+//! # }
 //! ```
 
 use futures::{future, Future, Poll};
@@ -46,21 +59,21 @@ impl Future for Connection {
 }
 
 /// A SOCKS4/5 proxy information
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Proxy<T: ToSocketAddrs> {
     Socks4 { addrs: T, user_id: String },
     Socks5 { addrs: T, auth: Option<Auth> },
 }
 
 /// An authentication information
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Auth {
     pub user: String,
     pub pass: String,
 }
 
 /// A TCP connector working through proxy
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Connector<T: ToSocketAddrs>(Proxy<T>);
 
 impl<T> Connector<T>

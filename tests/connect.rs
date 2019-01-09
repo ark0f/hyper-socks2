@@ -1,8 +1,9 @@
 use futures::future::Future;
-use hyper::{client::Client, Body};
-use hyper_socks2::{Auth, Connector as SocksConnector, Proxy};
-use hyper_tls::HttpsConnector;
-use native_tls::TlsConnector;
+use hyper::{
+    client::{connect::Connect, Client},
+    Body,
+};
+use hyper_socks2::{Auth, Connector, Proxy};
 use tokio::runtime::current_thread::Runtime;
 
 macro_rules! test {
@@ -34,21 +35,16 @@ macro_rules! test {
                     user_id: String::new(),
                 }
             };
-            let socks = SocksConnector::new(proxy);
-            let tls = TlsConnector::new().unwrap();
-            let https = HttpsConnector::from((socks, tls));
 
-            let (scheme, code) = if $https {
-                ("https", 200)
-            } else {
-                ("http", 302)
-            };
+            let connector = Connector::with_tls(proxy).unwrap();
+            let scheme = if $https { "https" } else { "http" };
+            let url = format!("{}://google.com", scheme).parse().unwrap()
 
             let fut = Client::builder()
-                .build::<_, Body>(https)
-                .get(format!("{}://ya.ru", scheme).parse().unwrap())
+                .build::<_, Body>(connector)
+                .get(url)
                 .map(move |resp| {
-                    assert_eq!(resp.status(), code);
+                    assert!(resp.status().is_success());
                 });
 
             Runtime::new().unwrap().block_on(fut).unwrap();

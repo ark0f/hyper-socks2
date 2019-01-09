@@ -3,7 +3,7 @@ name = "hyper-socks2"
 version = "0.1.4"
 authors = ["Arsenii Lyashenko <arsenylyashenko.3@gmail.com>"]
 license = "Apache-2.0 OR MIT"
-description = "The Reborn of the SOCKS4/5 connector for Hyper library"
+description = "The reborn of the SOCKS4/5 connector for Hyper library"
 repository = "https://github.com/ark0f/hyper-socks2"
 documentation = "https://docs.rs/hyper-socks2"
 readme = "README.md"
@@ -18,6 +18,9 @@ socks = "0.3"
 futures = "0.1"
 tokio = "0.1"
 
-[dev-dependencies]
-hyper-tls = "0.3"
-native-tls = "0.2"
+hyper-tls = { version = "0.3", optional = true }
+native-tls = { version = "0.2", optional = true }
+
+[features]
+default = ["tls"]
+tls = ["hyper-tls", "native-tls"]

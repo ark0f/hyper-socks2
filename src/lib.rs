@@ -1,4 +1,4 @@
-//! The Reborn of the SOCKS4/5 connector for Hyper library
+//! The reborn of the SOCKS4/5 connector for Hyper library
 //!
 //! # Example
 //! ```no_run
@@ -15,9 +15,14 @@
 
 use futures::{future, Future, Poll};
 use hyper::client::connect::{Connect, Connected, Destination};
+#[cfg(feature = "tls")]
+use native_tls::TlsConnector;
 use socks::{Socks4Stream, Socks5Stream};
 use std::{io, net::ToSocketAddrs};
 use tokio::{net::TcpStream, reactor::Handle};
+
+#[cfg(feature = "tls")]
+pub use {hyper_tls::HttpsConnector, native_tls::Error};
 
 /// A future with ready TCP stream
 pub struct Connection(Box<Future<Item = (TcpStream, Connected), Error = io::Error> + Send>);
@@ -65,6 +70,13 @@ where
     /// Create a new connector with a given proxy information
     pub fn new(proxy: Proxy<T>) -> Self {
         Connector(proxy)
+    }
+
+    /// Create a new connector with TLS support and a given proxy information
+    #[cfg(feature = "tls")]
+    pub fn with_tls(proxy: Proxy<T>) -> Result<HttpsConnector<Self>, Error> {
+        let args = (Self::new(proxy), TlsConnector::new()?);
+        Ok(HttpsConnector::from(args))
     }
 }
 

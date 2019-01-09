@@ -35,12 +35,13 @@ script:
     - cd ../..
     - cargo build -v --all
 
-after_success: |
-    if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
+before_cache: |
+    if [[ "$TRAVIS_RUST_VERSION" == nightly ]]
+    then
         RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install cargo-tarpaulin -f
         cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
         cargo tarpaulin --out Xml
         bash <(curl -s https://codecov.io/bash)
     else
         cargo test -v --all
-    if
+    fi

@@ -3,6 +3,7 @@
 ![License](https://img.shields.io/crates/l/hyper-socks2.svg)
 [![crates.io](https://img.shields.io/crates/v/hyper-socks2.svg)](https://crates.io/crates/hyper-socks2)
 [![API docs](https://docs.rs/hyper-socks2/badge.svg)](https://docs.rs/hyper-socks2)
+[![Codecov](https://codecov.io/gh/ark0f/hyper-socks2/branch/master/graph/badge.svg)](https://codecov.io/gh/ark0f/hyper-socks2)
 
 The Reborn of the SOCKS4/5 connector for Hyper library
 

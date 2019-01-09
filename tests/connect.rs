@@ -38,7 +38,7 @@ macro_rules! test {
 
             let connector = Connector::with_tls(proxy).unwrap();
             let scheme = if $https { "https" } else { "http" };
-            let url = format!("{}://google.com", scheme).parse().unwrap()
+            let url = format!("{}://google.com", scheme).parse().unwrap();
 
             let fut = Client::builder()
                 .build::<_, Body>(connector)

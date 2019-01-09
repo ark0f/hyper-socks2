@@ -1,8 +1,5 @@
 use futures::future::Future;
-use hyper::{
-    client::{connect::Connect, Client},
-    Body,
-};
+use hyper::{client::Client, Body};
 use hyper_socks2::{Auth, Connector, Proxy};
 use tokio::runtime::current_thread::Runtime;
 
@@ -44,7 +41,7 @@ macro_rules! test {
                 .build::<_, Body>(connector)
                 .get(url)
                 .map(move |resp| {
-                    assert!(resp.status().is_success());
+                    assert!(resp.status().is_redirection());
                 });
 
             Runtime::new().unwrap().block_on(fut).unwrap();

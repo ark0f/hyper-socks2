@@ -1,13 +1,15 @@
 language: rust
 cache:
-    - cargo
-    - ccache
+    cargo: true
+    directories:
+        - 3proxy
 rust:
     - stable
     - beta
     - nightly
 
 matrix:
+    fast_finish: true
     allow_failures:
         - rust: nightly
 
@@ -20,9 +22,10 @@ addons:
             - libssl-dev
 
 script:
-    - git clone https://github.com/z3APA3A/3proxy
-    - cd 3proxy
-    - make CC='ccache gcc' -f Makefile.Linux -j2
+    - curl -v -L https://codeload.github.com/z3APA3A/3proxy/legacy.tar.gz/devel -o 3proxy.tar.gz
+    - tar -xvzf 3proxy.tar.gz -C 3proxy
+    - cd 3proxy/z3APA3A-3proxy*
+    - make -f Makefile.Linux
     - cd bin
     - |
         echo "
@@ -32,7 +35,7 @@ script:
         socks
         " > 3proxy.cfg
     - ./3proxy 3proxy.cfg &
-    - cd ../..
+    - cd $TRAVIS_BUILD_DIR
     - cargo build -v --all
 
 before_cache: |

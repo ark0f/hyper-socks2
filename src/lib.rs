@@ -19,6 +19,10 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! # Features
+//! * `tls` feature enabled by default. It adds TLS support using `hyper-tls`.
+//!
 
 use futures::{Async, Future, Poll};
 use hyper::client::connect::{Connect, Connected, Destination};

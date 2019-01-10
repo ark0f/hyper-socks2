@@ -3,7 +3,7 @@
 //! # Example
 //! ```
 //! use hyper::{client::Client, Body};
-//! use hyper_socks2::{Connector, Proxy};
+//! use hyper_socks2::Proxy;
 //!
 //! # use hyper_socks2::Error;
 //! # fn hidden() -> Result<(), Error> {
@@ -22,7 +22,6 @@
 //!
 //! # Features
 //! * `tls` feature enabled by default. It adds TLS support using `hyper-tls`.
-//!
 
 use futures::{Async, Future, Poll};
 use hyper::client::connect::{Connect, Connected, Destination};

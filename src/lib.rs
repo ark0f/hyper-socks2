@@ -12,21 +12,15 @@
 //!     auth: None,
 //! };
 //!
-//! # let connector = Connector::new(proxy.clone());
-//! # if false {
-//! // HTTP
-//! let connector = Connector::new(proxy);
-//! # } else {
-//! // or HTTPS
-//! let connector = Connector::with_tls(proxy)?;
-//! # }
+//! // with TLS support
+//! let proxy = proxy.with_tls()?;
 //!
-//! let client = Client::builder().build::<_, Body>(connector);
+//! let client = Client::builder().build::<_, Body>(proxy);
 //! # Ok(())
 //! # }
 //! ```
 
-use futures::{future, Future, Poll};
+use futures::{Async, Future, Poll};
 use hyper::client::connect::{Connect, Connected, Destination};
 #[cfg(feature = "tls")]
 use native_tls::TlsConnector;
@@ -38,14 +32,18 @@ use tokio::{net::TcpStream, reactor::Handle};
 pub use {hyper_tls::HttpsConnector, native_tls::Error};
 
 /// A future with ready TCP stream
-pub struct Connection(Box<Future<Item = (TcpStream, Connected), Error = io::Error> + Send>);
+pub struct Connection {
+    inner: Option<Poll<(TcpStream, Connected), io::Error>>,
+}
 
 impl Connection {
-    fn new<F>(f: F) -> Self
-    where
-        F: Future<Item = (TcpStream, Connected), Error = io::Error> + Send + 'static,
-    {
-        Connection(Box::new(f))
+    fn result(result: Result<(TcpStream, Connected), io::Error>) -> Self {
+        let inner = Some(result.map(Async::Ready));
+        Connection { inner }
+    }
+
+    fn error(error: io::Error) -> Self {
+        Connection::result(Err(error))
     }
 }
 
@@ -54,11 +52,11 @@ impl Future for Connection {
     type Error = io::Error;
 
     fn poll(&mut self) -> Poll<Self::Item, Self::Error> {
-        self.0.poll()
+        self.inner.take().expect("cannot take Poll twice")
     }
 }
 
-/// A SOCKS4/5 proxy information
+/// A SOCKS4/5 proxy information and TCP connector
 #[derive(Debug, Clone)]
 pub enum Proxy<T: ToSocketAddrs> {
     Socks4 { addrs: T, user_id: String },
@@ -72,28 +70,19 @@ pub struct Auth {
     pub pass: String,
 }
 
-/// A TCP connector working through proxy
-#[derive(Debug, Clone)]
-pub struct Connector<T: ToSocketAddrs>(Proxy<T>);
-
-impl<T> Connector<T>
+impl<T> Proxy<T>
 where
     T: ToSocketAddrs,
 {
-    /// Create a new connector with a given proxy information
-    pub fn new(proxy: Proxy<T>) -> Self {
-        Connector(proxy)
-    }
-
-    /// Create a new connector with TLS support and a given proxy information
+    /// Create a new connector with TLS support
     #[cfg(feature = "tls")]
-    pub fn with_tls(proxy: Proxy<T>) -> Result<HttpsConnector<Self>, Error> {
-        let args = (Self::new(proxy), TlsConnector::new()?);
+    pub fn with_tls(self) -> Result<HttpsConnector<Self>, Error> {
+        let args = (self, TlsConnector::new()?);
         Ok(HttpsConnector::from(args))
     }
 }
 
-impl<T> Connect for Connector<T>
+impl<T> Connect for Proxy<T>
 where
     T: ToSocketAddrs + Send + Sync,
 {
@@ -110,22 +99,15 @@ where
         } else if scheme == "https" {
             443
         } else {
-            return Connection::new(future::err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "missing port",
-            )));
+            return Connection::error(io::Error::new(io::ErrorKind::InvalidInput, "missing port"));
         };
         let target = (dst.host(), port);
 
-        let fut = match self.0 {
+        let res = match self {
             Proxy::Socks4 {
                 ref addrs,
                 ref user_id,
-            } => {
-                let res = Socks4Stream::connect(addrs, target, user_id.as_str())
-                    .map(|stream| stream.into_inner());
-                future::result(res)
-            }
+            } => Socks4Stream::connect(addrs, target, &user_id).map(Socks4Stream::into_inner),
             Proxy::Socks5 {
                 ref addrs,
                 ref auth,
@@ -136,14 +118,13 @@ where
                     }
                     None => Socks5Stream::connect(addrs, target),
                 };
-                let res = res.map(|stream| stream.into_inner());
-                future::result(res)
+                res.map(Socks5Stream::into_inner)
             }
         };
-        let fut = fut
+        let res = res
             .and_then(|stream| TcpStream::from_std(stream, &Handle::default()))
             .map(|stream| (stream, Connected::new()));
 
-        Connection::new(fut)
+        Connection::result(res)
     }
 }

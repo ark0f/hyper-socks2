@@ -1,6 +1,6 @@
 use futures::future::Future;
 use hyper::{client::Client, Body};
-use hyper_socks2::{Auth, Connector, Proxy};
+use hyper_socks2::{Auth, Proxy};
 use tokio::runtime::current_thread::Runtime;
 
 macro_rules! test_url {
@@ -32,12 +32,11 @@ macro_rules! test_url {
                     user_id: String::new(),
                 }
             };
-
-            let connector = Connector::with_tls(proxy).unwrap();
+            let proxy = proxy.with_tls().unwrap();
             let url = $url.parse().unwrap();
 
             let fut = Client::builder()
-                .build::<_, Body>(connector)
+                .build::<_, Body>(proxy)
                 .get(url)
                 .map(|resp| assert!(resp.status().is_redirection()));
 
@@ -68,7 +67,7 @@ macro_rules! test {
 
 test_url! {
     name: specified_port,
-    proxy: "socsk4",
+    proxy: "socks4",
     auth: false,
     url: "http://google.com:80",
 }
@@ -121,9 +120,9 @@ fn missing_port() {
         addrs: "127.0.0.1:1080",
         user_id: "".to_string(),
     };
-    let connector = Connector::new(proxy);
+    let proxy = proxy.with_tls().unwrap();
     let fut = Client::builder()
-        .build::<_, Body>(connector)
+        .build::<_, Body>(proxy)
         .get("not-http://google.com".parse().unwrap())
         .map_err(|err| assert!(err.is_connect()));
     assert!(Runtime::new().unwrap().block_on(fut).is_err());

@@ -9,6 +9,7 @@ documentation = "https://docs.rs/hyper-socks2"
 readme = "README.md"
 keywords = ["hyper", "network", "ssl", "tls"]
 categories = ["authentication", "network-programming", "web-programming::http-client"]
+include = ["Cargo.toml", "LICENSE-*.md", "src/**/*"]
 edition = "2018"
 
 [badges]
@@ -20,6 +21,7 @@ socks = "0.3"
 futures = "0.1"
 tokio = "0.1"
 
+# `tls` feature
 hyper-tls = { version = "0.3", optional = true }
 native-tls = { version = "0.2", optional = true }
 

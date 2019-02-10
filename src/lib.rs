@@ -60,14 +60,14 @@ impl Future for Connection {
 }
 
 /// A SOCKS4/5 proxy information and TCP connector
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Proxy<T: ToSocketAddrs> {
     Socks4 { addrs: T, user_id: String },
     Socks5 { addrs: T, auth: Option<Auth> },
 }
 
 /// An authentication information
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Auth {
     pub user: String,
     pub pass: String,

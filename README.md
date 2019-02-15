@@ -7,6 +7,8 @@
 
 The reborn of the SOCKS4/5 connector for Hyper library
 
+# [Changelog](https://github.com/ark0f/hyper-socks2/blob/master/CHANGELOG.md)
+
 # License
 hyper-socks2 under either of:
 

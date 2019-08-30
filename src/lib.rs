@@ -27,12 +27,17 @@ use futures::{Async, Future, Poll};
 use hyper::client::connect::{Connect, Connected, Destination};
 #[cfg(feature = "tls")]
 use native_tls::TlsConnector;
+#[cfg(feature = "rustls")]
+use tokio_rustls::TlsConnector;
 use socks::{Socks4Stream, Socks5Stream};
 use std::{io, net::ToSocketAddrs};
 use tokio::{net::TcpStream, reactor::Handle};
 
 #[cfg(feature = "tls")]
 pub use {hyper_tls::HttpsConnector, native_tls::Error};
+
+#[cfg(feature = "rustls")]
+pub use hyper_rustls::HttpsConnector;
 
 /// A future with ready TCP stream
 pub struct Connection {
@@ -81,6 +86,14 @@ where
     #[cfg(feature = "tls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, Error> {
         let args = (self, TlsConnector::new()?);
+        Ok(HttpsConnector::from(args))
+    }
+
+    /// Create a new connector with rustls support
+    #[cfg(feature = "rustls")]
+    pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
+        let cfg = std::sync::Arc::new(tokio_rustls::rustls::ClientConfig::new());
+        let args = (self, cfg);
         Ok(HttpsConnector::from(args))
     }
 }

@@ -25,6 +25,11 @@ tokio = "0.1"
 hyper-tls = { version = "0.3", optional = true }
 native-tls = { version = "0.2", optional = true }
 
+# `rustls` feature
+tokio-rustls = { version = "0.9", optional=true }
+hyper-rustls = { version = "0.16", optional=true }
+
 [features]
 default = ["tls"]
 tls = ["hyper-tls", "native-tls"]
+rustls = ["tokio-rustls", "hyper-rustls"]

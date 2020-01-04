@@ -1,4 +1,4 @@
-//! A SOCKS5 connector for Hyper library
+//! A SOCKS5 connector for hyper library
 //!
 //! # Example
 //! ```no_run

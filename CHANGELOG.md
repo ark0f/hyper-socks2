@@ -1,3 +1,6 @@
+# v0.3.0 (2020-01-04)
+Add `async`/`.await` support
+
 # v0.2.1 (2019-02-10)
 Added 'Eq' and 'PartialEq' derives
 

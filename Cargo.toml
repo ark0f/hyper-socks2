@@ -1,9 +1,9 @@
 [package]
 name = "hyper-socks2"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Arsenii Lyashenko <arsenylyashenko.3@gmail.com>"]
 license = "Apache-2.0 OR MIT"
-description = "A SOCKS5 connector for Hyper library"
+description = "A SOCKS5 connector for hyper library"
 repository = "https://github.com/ark0f/hyper-socks2"
 documentation = "https://docs.rs/hyper-socks2"
 readme = "README.md"
@@ -13,7 +13,7 @@ include = ["Cargo.toml", "LICENSE-*.md", "src/**/*"]
 edition = "2018"
 
 [badges]
-travis-ci = { repository = "ark0f/hyper-socks2", branch = "master" }
+github-actions = { repository = "https://github.com/ark0f/hyper-socks2", workflow = "CI" }
 
 [dependencies]
 hyper = "0.13"

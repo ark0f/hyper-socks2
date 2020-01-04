@@ -131,6 +131,10 @@ mod tests {
     use hyper::{Body, Client};
 
     const PROXY_ADDR: &str = "127.0.0.1:1080";
+    const PROXY_USERNAME: &str = "hyper";
+    const PROXY_PASSWORD: &str = "proxy";
+    const HTTP_ADDR: &str = "http://google.com";
+    const HTTPS_ADDR: &str = "https://google.com";
 
     enum ConnectorKind {
         Http,
@@ -159,8 +163,8 @@ mod tests {
 
         fn with_auth(mut self) -> Self {
             self.auth = Some(Auth {
-                username: "hyper".to_string(),
-                password: "proxy".to_string(),
+                username: PROXY_USERNAME.to_string(),
+                password: PROXY_PASSWORD.to_string(),
             });
             self
         }
@@ -174,10 +178,10 @@ mod tests {
             let fut = match self.connector_kind {
                 ConnectorKind::Http => Client::builder()
                     .build::<_, Body>(socks)
-                    .get(Uri::from_static("http://google.com")),
+                    .get(Uri::from_static(HTTP_ADDR)),
                 ConnectorKind::Https => Client::builder()
                     .build::<_, Body>(socks.with_tls().unwrap())
-                    .get(Uri::from_static("https://google.com")),
+                    .get(Uri::from_static(HTTPS_ADDR)),
             };
             let _ = fut.await.unwrap();
         }

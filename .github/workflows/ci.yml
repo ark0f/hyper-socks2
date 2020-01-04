@@ -76,6 +76,10 @@ jobs:
                   profile: minimal
                   toolchain: nightly
                   override: true
+            - run: sudo add-apt-repository ppa:artyom.h31/3proxy
+            - run: sudo apt update
+            - run: sudo apt install 3proxy
+            - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
             - uses: actions-rs/cargo@v1
               with:
                   command: test
@@ -90,3 +94,9 @@ jobs:
                       -Coverflow-checks=off
                       -Zno-landing-pads
             - uses: actions-rs/grcov@v0.1
+              id: coverage
+            - uses: codecov/codecov-action@v1
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }} #required
+                  file: ${{ steps.coverage.outputs.report }}
+                  fail_ci_if_error: true

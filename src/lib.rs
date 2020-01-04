@@ -4,7 +4,6 @@
 //! ```no_run
 //! # use std::error::Error;
 //! # fn hidden() -> Result<(), Box<dyn Error>> {
-//!
 //! use hyper::{client::Client, Body};
 //! use hyper_socks2::SocksConnector;
 //!
@@ -25,13 +24,15 @@
 //! # Features
 //! * `tls` feature is enabled by default. It adds TLS support using `hyper-tls`.
 
-use async_socks5::{AddrKind, Auth};
+use async_socks5::AddrKind;
 use futures::task::{Context, Poll};
 use http::uri::Scheme;
 use hyper::{service::Service, Uri};
 use hyper_tls::HttpsConnector;
 use std::{future::Future, io, pin::Pin};
 use tokio::net::{TcpStream, ToSocketAddrs};
+
+pub use async_socks5::Auth;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -51,7 +52,13 @@ pub enum Error {
     MissingHost,
 }
 
-#[derive(Debug, Clone)]
+/// A future is returned from [`SocksConnector`] service
+///
+/// [`SocksConnector`]: struct.SocksConnector.html
+pub type SocksFuture = Pin<Box<dyn Future<Output = Result<TcpStream, Error>> + Send>>;
+
+/// A SOCKS5 proxy information and TCP connector
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct SocksConnector<T> {
     pub proxy_addr: T,
     pub auth: Option<Auth>,
@@ -105,23 +112,7 @@ where
 
     fn call(&mut self, req: Uri) -> Self::Future {
         let this = self.clone();
-        SocksFuture {
-            fut: Box::pin(async move { this.call_async(req).await }),
-        }
-    }
-}
-
-type ConnectResult = Result<TcpStream, Error>;
-
-pub struct SocksFuture {
-    fut: Pin<Box<dyn Future<Output = ConnectResult> + Send>>,
-}
-
-impl Future for SocksFuture {
-    type Output = ConnectResult;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
-        Pin::new(&mut self.fut).poll(cx)
+        Box::pin(async move { this.call_async(req).await })
     }
 }
 

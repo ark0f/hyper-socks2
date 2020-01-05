@@ -127,29 +127,27 @@ mod tests {
     const HTTP_ADDR: &str = "http://google.com";
     const HTTPS_ADDR: &str = "https://google.com";
 
-    enum ConnectorKind {
-        Http,
-        Https,
-    }
-
     struct Tester {
-        connector_kind: ConnectorKind,
+        uri: Uri,
         auth: Option<Auth>,
+        swap_connector: bool,
     }
 
     impl Tester {
-        fn http() -> Self {
+        fn uri(uri: Uri) -> Tester {
             Self {
-                connector_kind: ConnectorKind::Http,
+                uri,
                 auth: None,
+                swap_connector: false,
             }
         }
 
+        fn http() -> Self {
+            Self::uri(Uri::from_static(HTTP_ADDR))
+        }
+
         fn https() -> Self {
-            Self {
-                connector_kind: ConnectorKind::Https,
-                auth: None,
-            }
+            Self::uri(Uri::from_static(HTTPS_ADDR))
         }
 
         fn with_auth(mut self) -> Self {
@@ -160,19 +158,23 @@ mod tests {
             self
         }
 
+        fn swap_connector(mut self) -> Self {
+            self.swap_connector = true;
+            self
+        }
+
         async fn test(self) {
             let socks = SocksConnector {
                 proxy_addr: PROXY_ADDR,
                 auth: self.auth,
             };
 
-            let fut = match self.connector_kind {
-                ConnectorKind::Http => Client::builder()
-                    .build::<_, Body>(socks)
-                    .get(Uri::from_static(HTTP_ADDR)),
-                ConnectorKind::Https => Client::builder()
+            let fut = if (self.uri.scheme() == Some(&Scheme::HTTP)) ^ self.swap_connector {
+                Client::builder().build::<_, Body>(socks).get(self.uri)
+            } else {
+                Client::builder()
                     .build::<_, Body>(socks.with_tls().unwrap())
-                    .get(Uri::from_static(HTTPS_ADDR)),
+                    .get(self.uri)
             };
             let _ = fut.await.unwrap();
         }
@@ -196,5 +198,27 @@ mod tests {
     #[tokio::test]
     async fn https_auth() {
         Tester::https().with_auth().test().await
+    }
+
+    #[tokio::test]
+    async fn http_no_auth_swap() {
+        Tester::http().swap_connector().test().await
+    }
+
+    #[should_panic = "IncompleteMessage"]
+    #[tokio::test]
+    async fn https_no_auth_swap() {
+        Tester::https().swap_connector().test().await
+    }
+
+    #[tokio::test]
+    async fn http_auth_swap() {
+        Tester::http().with_auth().swap_connector().test().await
+    }
+
+    #[should_panic = "IncompleteMessage"]
+    #[tokio::test]
+    async fn https_auth_swap() {
+        Tester::https().with_auth().swap_connector().test().await
     }
 }

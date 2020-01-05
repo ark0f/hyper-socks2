@@ -33,6 +33,7 @@ use std::{future::Future, io, pin::Pin};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
 pub use async_socks5::Auth;
+pub use hyper_tls::native_tls::Error as TlsError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -67,7 +68,7 @@ pub struct SocksConnector<T> {
 impl<T> SocksConnector<T> {
     /// Create a new connector with TLS support
     #[cfg(feature = "tls")]
-    pub fn with_tls(self) -> Result<HttpsConnector<Self>, hyper_tls::native_tls::Error> {
+    pub fn with_tls(self) -> Result<HttpsConnector<Self>, TlsError> {
         let args = (self, hyper_tls::native_tls::TlsConnector::new()?.into());
         Ok(HttpsConnector::from(args))
     }

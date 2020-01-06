@@ -1,3 +1,6 @@
+# v0.4.0 (2020-01-06)
+Now you can use any connector for more flexibility
+
 # v0.3.0 (2020-01-04)
 Add `async`/`.await` support
 

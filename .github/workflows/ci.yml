@@ -3,8 +3,34 @@ on: [push, pull_request]
 name: CI
 
 jobs:
+    rustfmt:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - name: Install toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: nightly
+                  override: true
+                  components: rustfmt
+            - name: cargo fmt
+              uses: actions-rs/cargo@v1
+              with:
+                  command: fmt
+                  args: --all -- --check
+    clippy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - run: rustup component add clippy
+            - uses: actions-rs/clippy-check@v1
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  args: --all-targets --all-features -- -D warnings
     test:
         runs-on: ubuntu-latest
+        needs: clippy
         steps:
             - uses: actions/checkout@v1
             - name: Cache cargo registry
@@ -42,33 +68,9 @@ jobs:
             - run: sudo apt install 3proxy
             - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
             - run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets --all-features -- --test-threads=1
-    rustfmt:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v1
-            - name: Install toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: nightly
-                  override: true
-                  components: rustfmt
-            - name: cargo fmt
-              uses: actions-rs/cargo@v1
-              with:
-                  command: fmt
-                  args: --all -- --check
-    clippy:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v1
-            - run: rustup component add clippy
-            - uses: actions-rs/clippy-check@v1
-              with:
-                  token: ${{ secrets.GITHUB_TOKEN }}
-                  args: --all-targets --all-features -- -D warnings
     coverage:
         runs-on: ubuntu-latest
+        needs: test
         steps:
             - uses: actions/checkout@v1
             - uses: actions-rs/toolchain@v1

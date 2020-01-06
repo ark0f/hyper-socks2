@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "async-socks5"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "async-trait 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -260,7 +260,7 @@ dependencies = [
 name = "hyper-socks2"
 version = "0.3.0"
 dependencies = [
- "async-socks5 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-socks5 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "http 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -754,7 +754,7 @@ dependencies = [
 ]
 
 [metadata]
-"checksum async-socks5 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "e3ce6d93267164a3eabe6c22af018594096584035470babc2c72b6215c52c008"
+"checksum async-socks5 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "57ef0ef2aa333e2544c528e34d355430f20cdbfedd4ba68ebe942815f9f022ea"
 "checksum async-trait 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)" = "c8df72488e87761e772f14ae0c2480396810e51b2c2ade912f97f0f7e5b95e3c"
 "checksum autocfg 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "1d49d90015b3c36167a20fe2810c5cd875ad504b39cff3d4eae7977e6b7c1cb2"
 "checksum bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"

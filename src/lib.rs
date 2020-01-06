@@ -4,12 +4,16 @@
 //! ```no_run
 //! # use std::error::Error;
 //! # fn hidden() -> Result<(), Box<dyn Error>> {
-//! use hyper::{client::Client, Body};
+//! use hyper::{Body, Uri};
+//! use hyper::client::{Client, HttpConnector};
 //! use hyper_socks2::SocksConnector;
 //!
+//! let mut connector = HttpConnector::new();
+//! connector.enforce_http(false);
 //! let proxy = SocksConnector {
-//!     proxy_addr: "your.socks5.proxy:1080",
+//!     proxy_addr: Uri::from_static("your.socks5.proxy:1080"),
 //!     auth: None,
+//!     connector,
 //! };
 //!
 //! // with TLS support
@@ -30,7 +34,7 @@ use http::uri::Scheme;
 use hyper::{service::Service, Uri};
 use hyper_tls::HttpsConnector;
 use std::{future::Future, io, pin::Pin};
-use tokio::net::{TcpStream, ToSocketAddrs};
+use tokio::io::{AsyncRead, AsyncWrite};
 
 pub use async_socks5::Auth;
 pub use hyper_tls::native_tls::Error as TlsError;
@@ -49,6 +53,12 @@ pub enum Error {
         #[source]
         io::Error,
     ),
+    #[error("{}", &0)]
+    Connector(
+        #[from]
+        #[source]
+        BoxedError,
+    ),
     #[error("Missing host")]
     MissingHost,
 }
@@ -56,16 +66,19 @@ pub enum Error {
 /// A future is returned from [`SocksConnector`] service
 ///
 /// [`SocksConnector`]: struct.SocksConnector.html
-pub type SocksFuture = Pin<Box<dyn Future<Output = Result<TcpStream, Error>> + Send>>;
+pub type SocksFuture<R> = Pin<Box<dyn Future<Output = Result<R, Error>> + Send>>;
+
+pub type BoxedError = Box<dyn std::error::Error + Send + Sync>;
 
 /// A SOCKS5 proxy information and TCP connector
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SocksConnector<T> {
-    pub proxy_addr: T,
+pub struct SocksConnector<C> {
+    pub proxy_addr: Uri,
     pub auth: Option<Auth>,
+    pub connector: C,
 }
 
-impl<T> SocksConnector<T> {
+impl<C> SocksConnector<C> {
     /// Create a new connector with TLS support
     #[cfg(feature = "tls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, TlsError> {
@@ -74,11 +87,13 @@ impl<T> SocksConnector<T> {
     }
 }
 
-impl<T> SocksConnector<T>
+impl<C> SocksConnector<C>
 where
-    T: ToSocketAddrs,
+    C: Service<Uri>,
+    C::Response: AsyncRead + AsyncWrite + Send + Unpin,
+    C::Error: Into<BoxedError>,
 {
-    async fn call_async(self, target_addr: Uri) -> Result<TcpStream, Error> {
+    async fn call_async(mut self, target_addr: Uri) -> Result<C::Response, Error> {
         let host = target_addr
             .host()
             .map(str::to_string)
@@ -93,19 +108,26 @@ where
                 });
         let target_addr = AddrKind::Domain(host, port);
 
-        let mut stream = TcpStream::connect(self.proxy_addr).await?;
+        let mut stream = self
+            .connector
+            .call(self.proxy_addr)
+            .await
+            .map_err(Into::<BoxedError>::into)?;
         let _ = async_socks5::connect(&mut stream, target_addr, self.auth).await?;
         Ok(stream)
     }
 }
 
-impl<T> Service<Uri> for SocksConnector<T>
+impl<C> Service<Uri> for SocksConnector<C>
 where
-    T: ToSocketAddrs + Clone + Send + Sync + 'static,
+    C: Service<Uri> + Clone + Send + 'static,
+    C::Response: AsyncRead + AsyncWrite + Send + Unpin,
+    C::Error: Into<BoxedError>,
+    C::Future: Send,
 {
-    type Response = TcpStream;
+    type Response = C::Response;
     type Error = Error;
-    type Future = SocksFuture;
+    type Future = SocksFuture<C::Response>;
 
     fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         Poll::Ready(Ok(()))
@@ -120,9 +142,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hyper::{Body, Client};
+    use hyper::{client::HttpConnector, Body, Client};
 
-    const PROXY_ADDR: &str = "127.0.0.1:1080";
+    const PROXY_ADDR: &str = "socks5://127.0.0.1:1080";
     const PROXY_USERNAME: &str = "hyper";
     const PROXY_PASSWORD: &str = "proxy";
     const HTTP_ADDR: &str = "http://google.com";
@@ -165,9 +187,12 @@ mod tests {
         }
 
         async fn test(self) {
+            let mut connector = HttpConnector::new();
+            connector.enforce_http(false);
             let socks = SocksConnector {
-                proxy_addr: PROXY_ADDR,
+                proxy_addr: Uri::from_static(PROXY_ADDR),
                 auth: self.auth,
+                connector,
             };
 
             let fut = if (self.uri.scheme() == Some(&Scheme::HTTP)) ^ self.swap_connector {

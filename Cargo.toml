@@ -19,7 +19,7 @@ github-actions = { repository = "https://github.com/ark0f/hyper-socks2", workflo
 hyper = "0.13"
 async-socks5 = "0.3"
 futures = "0.3"
-tokio = { version = "0.2", features = ["net", "tcp"] }
+tokio = "0.2"
 thiserror = "1.0.9"
 http = "0.2"
 
@@ -27,7 +27,7 @@ http = "0.2"
 hyper-tls = { version = "0.4", optional = true }
 
 [dev-dependencies]
-tokio = { version = "0.2", features = ["net", "tcp", "macros"] }
+tokio = { version = "0.2", features = ["macros"] }
 
 [features]
 default = ["tls"]

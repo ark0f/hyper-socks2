@@ -1,3 +1,6 @@
+# v0.4.1 (2020-01-07)
+Fix when connector's `poll_ready` is not called
+
 # v0.4.0 (2020-01-06)
 Now you can use any connector for more flexibility
 

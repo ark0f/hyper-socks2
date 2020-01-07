@@ -11,7 +11,7 @@
 //! let mut connector = HttpConnector::new();
 //! connector.enforce_http(false);
 //! let proxy = SocksConnector {
-//!     proxy_addr: Uri::from_static("your.socks5.proxy:1080"),
+//!     proxy_addr: Uri::from_static("socks5://your.socks5.proxy:1080"), // scheme is required by HttpConnector
 //!     auth: None,
 //!     connector,
 //! };
@@ -29,7 +29,10 @@
 //! * `tls` feature is enabled by default. It adds TLS support using `hyper-tls`.
 
 use async_socks5::AddrKind;
-use futures::task::{Context, Poll};
+use futures::{
+    ready,
+    task::{Context, Poll},
+};
 use http::uri::Scheme;
 use hyper::{service::Service, Uri};
 use hyper_tls::HttpsConnector;
@@ -129,7 +132,8 @@ where
     type Error = Error;
     type Future = SocksFuture<C::Response>;
 
-    fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        ready!(self.connector.poll_ready(cx)).map_err(Into::<BoxedError>::into)?;
         Poll::Ready(Ok(()))
     }
 

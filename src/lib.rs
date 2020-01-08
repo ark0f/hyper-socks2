@@ -35,11 +35,14 @@ use futures::{
 };
 use http::uri::Scheme;
 use hyper::{service::Service, Uri};
+#[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
 use std::{future::Future, io, pin::Pin};
 use tokio::io::{AsyncRead, AsyncWrite};
 
 pub use async_socks5::Auth;
+
+#[cfg(feature = "tls")]
 pub use hyper_tls::native_tls::Error as TlsError;
 
 #[derive(Debug, thiserror::Error)]

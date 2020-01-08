@@ -1,3 +1,6 @@
+# v0.4.2 (2020-01-08)
+Fix when library doesn't compile without `tls` feature
+
 # v0.4.1 (2020-01-07)
 Fix when connector's `poll_ready` is not called
 

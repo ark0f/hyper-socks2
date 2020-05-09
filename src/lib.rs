@@ -45,9 +45,9 @@ use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
 #[cfg(feature = "rustls")]
-use rusttls::ClientConfig;
-#[cfg(feature = "rustls")]
 use rustls_native_certs;
+#[cfg(feature = "rustls")]
+use rusttls::ClientConfig;
 #[cfg(feature = "rustls")]
 use std::sync::Arc;
 use std::{future::Future, io, pin::Pin};

@@ -28,6 +28,11 @@
 //! # Features
 //! * `tls` feature is enabled by default. It adds TLS support using `hyper-tls`.
 
+#[cfg(all(feature = "tls", feature = "rustls"))]
+compile_error!(
+    "`tls` and `rustls` features are mutually exclusive. You should enable only one of them"
+);
+
 use async_socks5::AddrKind;
 use futures::{
     ready,
@@ -35,8 +40,16 @@ use futures::{
 };
 use http::uri::Scheme;
 use hyper::{service::Service, Uri};
+#[cfg(feature = "rustls")]
+use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
+#[cfg(feature = "rustls")]
+use rusttls::ClientConfig;
+#[cfg(feature = "rustls")]
+use rustls_native_certs;
+#[cfg(feature = "rustls")]
+use std::sync::Arc;
 use std::{future::Future, io, pin::Pin};
 use tokio::io::{AsyncRead, AsyncWrite};
 
@@ -89,6 +102,21 @@ impl<C> SocksConnector<C> {
     #[cfg(feature = "tls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, TlsError> {
         let args = (self, hyper_tls::native_tls::TlsConnector::new()?.into());
+        Ok(HttpsConnector::from(args))
+    }
+
+    /// Create a new connector with TLS support
+    #[cfg(feature = "rustls")]
+    pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
+        let mut config = ClientConfig::new();
+        config.root_store = match rustls_native_certs::load_native_certs() {
+            Ok(store) => store,
+            Err((_, err)) => return Err(err),
+        };
+
+        let config = Arc::new(config);
+
+        let args = (self, config);
         Ok(HttpsConnector::from(args))
     }
 }

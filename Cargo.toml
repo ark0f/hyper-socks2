@@ -23,8 +23,10 @@ tokio = "0.2"
 thiserror = "1.0.9"
 http = "0.2"
 
-# `tls` feature
-hyper-tls = { version = "0.4", optional = true }
+hyper-tls = { version = "0.4",  optional = true }
+hyper-rustls = { version = "0.20", optional = true }
+rusttls = { package = "rustls", version = "0.17", optional = true }
+rustls-native-certs = { version = "0.3", optional = true }
 
 [dev-dependencies]
 tokio = { version = "0.2", features = ["macros"] }
@@ -32,3 +34,4 @@ tokio = { version = "0.2", features = ["macros"] }
 [features]
 default = ["tls"]
 tls = ["hyper-tls"]
+rustls = ["hyper-rustls", "rusttls", "rustls-native-certs"]

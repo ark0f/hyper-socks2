@@ -27,6 +27,7 @@
 //!
 //! # Features
 //! * `tls` feature is enabled by default. It adds TLS support using `hyper-tls`.
+//! * `rustls` feature adds TLS support using `hyper-rustls`.
 
 #[cfg(all(feature = "tls", feature = "rustls"))]
 compile_error!(

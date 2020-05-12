@@ -109,7 +109,8 @@ jobs:
                       -Cinline-threshold=0
                       -Clink-dead-code
                       -Coverflow-checks=off
-                      -Zno-landing-pads
+                      -Cpanic=abort
+                      -Zpanic_abort_test
             - uses: actions-rs/cargo@v1
               with:
                   command: test

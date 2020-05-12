@@ -38,7 +38,7 @@ jobs:
               uses: actions-rs/clippy-check@v1
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  args: --all-targets --no-default-features -- -D warnings
+                  args: --no-default-features -- -D warnings
     test:
         runs-on: ubuntu-latest
         needs: clippy
@@ -70,15 +70,14 @@ jobs:
                   profile: minimal
                   toolchain: stable
                   override: true
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: build
-                  args: --tests --all-features
             - run: sudo add-apt-repository ppa:artyom.h31/3proxy
             - run: sudo apt update
             - run: sudo apt install 3proxy
             - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
-            - run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets --all-features -- --test-threads=1
+            - name: Test with default features (tls)
+              run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets -- --test-threads=1
+            - name: Test with rustls feature
+              run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets --features rustls --no-default-features -- --test-threads=1
     coverage:
         runs-on: ubuntu-latest
         needs: test

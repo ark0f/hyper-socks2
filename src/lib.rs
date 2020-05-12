@@ -45,10 +45,6 @@ use hyper::{service::Service, Uri};
 use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
-#[cfg(feature = "rustls")]
-use rusttls::ClientConfig;
-#[cfg(feature = "rustls")]
-use std::sync::Arc;
 use std::{future::Future, io, pin::Pin};
 use tokio::io::{AsyncRead, AsyncWrite};
 
@@ -107,6 +103,9 @@ impl<C> SocksConnector<C> {
     /// Create a new connector with TLS support
     #[cfg(feature = "rustls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
+        use rusttls::ClientConfig;
+        use std::sync::Arc;
+
         let mut config = ClientConfig::new();
         config.root_store = match rustls_native_certs::load_native_certs() {
             Ok(store) => store,

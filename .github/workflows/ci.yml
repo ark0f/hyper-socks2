@@ -33,7 +33,7 @@ jobs:
               uses: actions-rs/clippy-check@v1
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  args: --all-targets --features="rustls" -- -D warnings
+                  args: --all-targets --features="rustls" --no-default-features -- -D warnings
             - name: cargo clippy without default features
               uses: actions-rs/clippy-check@v1
               with:

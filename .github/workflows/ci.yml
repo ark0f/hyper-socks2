@@ -27,7 +27,7 @@ jobs:
             - uses: actions-rs/clippy-check@v1
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
-                  args: --all-targets --features="tls" -- -D warnings
+                  args: --all-targets --features="tls" --no-default-features -- -D warnings
             - uses: actions-rs/clippy-check@v1
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}

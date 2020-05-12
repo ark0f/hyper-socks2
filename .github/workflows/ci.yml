@@ -74,8 +74,14 @@ jobs:
             - run: sudo apt update
             - run: sudo apt install 3proxy
             - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: build --all-targets
             - name: Test with default features (tls)
               run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets -- --test-threads=1
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: build --all-targets --features rustls --no-default-features
             - name: Test with rustls feature
               run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets --features rustls --no-default-features -- --test-threads=1
     coverage:

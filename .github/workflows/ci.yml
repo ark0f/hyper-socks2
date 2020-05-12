@@ -98,11 +98,8 @@ jobs:
             - run: sudo apt update
             - run: sudo apt install 3proxy
             - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
-            - uses: actions-rs/cargo@v1
+            - uses: allenevans/set-env@v1.0.0
               with:
-                  command: test
-                  args: --all-targets --all-features --no-fail-fast
-              env:
                   CARGO_INCREMENTAL: '0'
                   RUSTFLAGS: >-
                       -Zprofile
@@ -111,6 +108,14 @@ jobs:
                       -Clink-dead-code
                       -Coverflow-checks=off
                       -Zno-landing-pads
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: test
+                  args: --all-targets --no-fail-fast
+            - uses: actions-rs/cargo@v1
+              with:
+                  command: test
+                  args: --all-targets --no-fail-fast --features rustls --no-default-features
             - uses: actions-rs/grcov@v0.1
               id: coverage
             - uses: codecov/codecov-action@v1

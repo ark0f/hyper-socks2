@@ -1,3 +1,8 @@
+Format: # vX.X.X (YYYY-MM-DD)
+
+# v0.4.3 (2020-05-12)
+Add `rustls` support
+
 # v0.4.2 (2020-01-08)
 Fix when library doesn't compile without `tls` feature
 

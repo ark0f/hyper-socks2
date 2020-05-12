@@ -55,19 +55,19 @@ pub use hyper_tls::native_tls::Error as TlsError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("{}", &0)]
+    #[error("{0}")]
     Socks(
         #[from]
         #[source]
         async_socks5::Error,
     ),
-    #[error("{}", &0)]
+    #[error("{0}")]
     Io(
         #[from]
         #[source]
         io::Error,
     ),
-    #[error("{}", &0)]
+    #[error("{0}")]
     Connector(
         #[from]
         #[source]

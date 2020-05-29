@@ -46,7 +46,7 @@ use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
 use std::{future::Future, io, pin::Pin};
-use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::io::{AsyncRead, AsyncWrite, BufStream};
 
 pub use async_socks5::Auth;
 
@@ -140,13 +140,14 @@ where
                 });
         let target_addr = AddrKind::Domain(host, port);
 
-        let mut stream = self
+        let stream = self
             .connector
             .call(self.proxy_addr)
             .await
             .map_err(Into::<BoxedError>::into)?;
-        let _ = async_socks5::connect(&mut stream, target_addr, self.auth).await?;
-        Ok(stream)
+        let mut buf_stream = BufStream::new(stream);
+        let _ = async_socks5::connect(&mut buf_stream, target_addr, self.auth).await?;
+        Ok(buf_stream.into_inner())
     }
 }
 

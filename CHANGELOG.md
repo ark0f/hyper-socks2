@@ -1,5 +1,9 @@
 Format: # vX.X.X (YYYY-MM-DD)
 
+# v0.5.0 (2020-10-25)
+* Update `rustls` dependencies
+* Fix issue #3
+
 # v0.4.3 (2020-05-12)
 Add `rustls` support
 

@@ -27,9 +27,9 @@ http = "0.2"
 hyper-tls = { version = "0.4", optional = true }
 
 # `rustls` feature
-hyper-rustls = { version = "0.20", optional = true }
-rusttls = { package = "rustls", version = "0.17", optional = true }
-rustls-native-certs = { version = "0.3", optional = true }
+hyper-rustls = { version = "0.21", optional = true }
+rusttls = { package = "rustls", version = "0.18", optional = true }
+rustls-native-certs = { version = "0.4", optional = true }
 
 [dev-dependencies]
 tokio = { version = "0.2", features = ["macros"] }

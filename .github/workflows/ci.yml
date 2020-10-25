@@ -103,6 +103,7 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install 3proxy
       - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
+      - run: cargo install grcov
       - uses: allenevans/set-env@v1.0.0
         with:
           CARGO_INCREMENTAL: '0'

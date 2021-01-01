@@ -1,5 +1,9 @@
 Format: # vX.X.X (YYYY-MM-DD)
 
+# v0.6.0 (2021-01-01)
+* Update to hyper `0.14`
+* Add `with_rustls_root_cert_store` method to use already existing cert store
+
 # v0.5.0 (2020-10-25)
 * Update `rustls` dependencies
 * Fix issue #3

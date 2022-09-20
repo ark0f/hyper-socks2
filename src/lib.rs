@@ -103,14 +103,7 @@ impl<C> SocksConnector<C> {
     /// Create a new connector with TLS support
     #[cfg(feature = "rustls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
-        let mut root_store = rusttls::RootCertStore::empty();
-
-        let certs = rustls_native_certs::load_native_certs()?;
-        for cert in certs {
-            root_store
-                .add(&rusttls::Certificate(cert.0))
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-        }
+        let root_store = rustls_native_certs::load_native_certs().map_err(|(_, err)| err)?;
         Ok(self.with_rustls_root_cert_store(root_store))
     }
 
@@ -123,10 +116,8 @@ impl<C> SocksConnector<C> {
         use rusttls::ClientConfig;
         use std::sync::Arc;
 
-        let config = ClientConfig::builder()
-            .with_safe_defaults()
-            .with_root_certificates(root_store)
-            .with_no_client_auth();
+        let mut config = ClientConfig::new();
+        config.root_store = root_store;
 
         let config = Arc::new(config);
 
@@ -194,7 +185,7 @@ mod tests {
     use super::*;
     use hyper::{client::HttpConnector, Body, Client};
 
-    const PROXY_ADDR: &str = "socks5://127.0.0.1:7890";
+    const PROXY_ADDR: &str = "socks5://127.0.0.1:1080";
     const PROXY_USERNAME: &str = "hyper";
     const PROXY_PASSWORD: &str = "proxy";
     const HTTP_ADDR: &str = "http://google.com";

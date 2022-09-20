@@ -4,7 +4,7 @@ name: CI
 
 jobs:
   rustfmt:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
       - name: Install toolchain
@@ -20,7 +20,7 @@ jobs:
           command: fmt
           args: --all -- --check
   clippy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
       - run: rustup component add clippy
@@ -40,7 +40,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --no-default-features -- -D warnings
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: clippy
     steps:
       - uses: actions/checkout@v1
@@ -90,7 +90,7 @@ jobs:
       - name: Test with rustls feature
         run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets --features rustls --no-default-features -- --test-threads=1
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: test
     steps:
       - uses: actions/checkout@v1

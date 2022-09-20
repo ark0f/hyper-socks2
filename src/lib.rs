@@ -103,7 +103,13 @@ impl<C> SocksConnector<C> {
     /// Create a new connector with TLS support
     #[cfg(feature = "rustls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
-        let root_store = rustls_native_certs::load_native_certs().map_err(|(_, err)| err)?;
+        let certs = rustls_native_certs::load_native_certs()?;
+        let mut root_store = rusttls::RootCertStore::empty();
+        for rustls_native_certs::Certificate(cert) in certs {
+            root_store
+                .add(&rusttls::Certificate(cert))
+                .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err))?;
+        }
         Ok(self.with_rustls_root_cert_store(root_store))
     }
 
@@ -116,8 +122,10 @@ impl<C> SocksConnector<C> {
         use rusttls::ClientConfig;
         use std::sync::Arc;
 
-        let mut config = ClientConfig::new();
-        config.root_store = root_store;
+        let config = ClientConfig::builder()
+            .with_safe_defaults()
+            .with_root_certificates(root_store)
+            .with_no_client_auth();
 
         let config = Arc::new(config);
 

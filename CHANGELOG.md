@@ -1,5 +1,8 @@
 Format: # vX.X.X (YYYY-MM-DD)
 
+# v0.8.0 (2023-04-16)
+Update `rustls` dependencies
+
 # v0.7.0 (2022-09-23)
 * Update major version of rustls
 

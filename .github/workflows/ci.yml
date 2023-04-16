@@ -1,10 +1,14 @@
-on: [ push, pull_request ]
-
 name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
   rustfmt:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Install toolchain
@@ -20,7 +24,7 @@ jobs:
           command: fmt
           args: --all -- --check
   clippy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - run: rustup component add clippy
@@ -40,7 +44,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --no-default-features -- -D warnings
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     needs: clippy
     steps:
       - uses: actions/checkout@v1
@@ -73,9 +77,11 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - run: sudo add-apt-repository ppa:artyom.h31/3proxy
-      - run: sudo apt update
-      - run: sudo apt install 3proxy
+      - run: >-
+          curl -sL https://api.github.com/repos/3proxy/3proxy/releases/latest | 
+          jq -r ".assets[].browser_download_url | select(endswith(\"x86_64.deb\"))" | 
+          xargs wget
+      - run: sudo dpkg -i *.deb
       - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
       - uses: actions-rs/cargo@v1
         with:
@@ -90,7 +96,7 @@ jobs:
       - name: Test with rustls feature
         run: RUST_BACKTRACE=1 timeout 10 cargo test --all-targets --features rustls --no-default-features -- --test-threads=1
   coverage:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     needs: test
     steps:
       - uses: actions/checkout@v1
@@ -99,9 +105,11 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-      - run: sudo add-apt-repository ppa:artyom.h31/3proxy
-      - run: sudo apt update
-      - run: sudo apt install 3proxy
+      - run: >-
+          curl -sL https://api.github.com/repos/3proxy/3proxy/releases/latest | 
+          jq -r ".assets[].browser_download_url | select(endswith(\"x86_64.deb\"))" | 
+          xargs wget
+      - run: sudo dpkg -i *.deb
       - run: nohup cat .github/workflows/proxy.cfg | 3proxy &
       - run: cargo install grcov
       - uses: allenevans/set-env@v2.0.0

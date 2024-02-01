@@ -50,6 +50,7 @@ use hyper_rustls::HttpsConnector;
 use hyper_tls::HttpsConnector;
 use hyper_util::rt::TokioIo;
 use std::{future::Future, io, pin::Pin};
+use tokio::io::BufStream;
 use tower_service::Service;
 
 pub use async_socks5::Auth;
@@ -162,9 +163,9 @@ where
             .call(self.proxy_addr)
             .await
             .map_err(Into::<BoxedError>::into)?;
-        let mut buf_stream = TokioIo::new(stream); // fixes issue #3
+        let mut buf_stream = BufStream::new(TokioIo::new(stream)); // fixes issue #3
         let _ = async_socks5::connect(&mut buf_stream, target_addr, self.auth).await?;
-        Ok(buf_stream.into_inner())
+        Ok(buf_stream.into_inner().into_inner())
     }
 }
 

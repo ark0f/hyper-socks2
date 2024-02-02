@@ -16,24 +16,27 @@ edition = "2018"
 github-actions = { repository = "https://github.com/ark0f/hyper-socks2", workflow = "CI" }
 
 [dependencies]
-hyper = "0.14"
+hyper = "1"
 async-socks5 = "0.5"
 futures = "0.3"
 tokio = "1.0"
 thiserror = "1.0"
-http = "0.2"
-
+http = "1"
+tower-service = "0.3"
+hyper-util = { version = "0.1", features = ["tokio"] }
 # `tls` feature
-hyper-tls = { version = "0.5", optional = true }
+hyper-tls = { version = "0.6", optional = true }
 
 # `rustls` feature
-hyper-rustls = { version = "0.24", optional = true }
-rusttls = { package = "rustls", version = "0.21", optional = true }
-rustls-native-certs = { version = "0.6", optional = true }
+hyper-rustls = { version = "0.26", optional = true }
+rusttls = { package = "rustls", version = "0.22", optional = true }
+rustls-native-certs = { version = "0.7", optional = true }
 
 [dev-dependencies]
-hyper = { version = "0.14", features = ["http1"] }
 tokio = { version = "1.0", features = ["macros"] }
+hyper-util = { version = "0.1", features = ["http1", "client", "client-legacy"] }
+http-body-util = "0.1"
+bytes = "1"
 
 [features]
 default = ["tls"]

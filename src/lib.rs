@@ -40,13 +40,18 @@ use futures::{
     task::{Context, Poll},
 };
 use http::uri::Scheme;
-use hyper::{service::Service, Uri};
+use hyper::{
+    rt::{Read, Write},
+    Uri,
+};
 #[cfg(feature = "rustls")]
 use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
+use hyper_util::rt::TokioIo;
 use std::{future::Future, io, pin::Pin};
-use tokio::io::{AsyncRead, AsyncWrite, BufStream};
+use tokio::io::BufStream;
+use tower_service::Service;
 
 pub use async_socks5::Auth;
 
@@ -103,11 +108,10 @@ impl<C> SocksConnector<C> {
     /// Create a new connector with TLS support
     #[cfg(feature = "rustls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
-        let certs = rustls_native_certs::load_native_certs()?;
         let mut root_store = rusttls::RootCertStore::empty();
-        for rustls_native_certs::Certificate(cert) in certs {
+        for cert in rustls_native_certs::load_native_certs()? {
             root_store
-                .add(&rusttls::Certificate(cert))
+                .add(cert)
                 .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err))?;
         }
         Ok(self.with_rustls_root_cert_store(root_store))
@@ -123,7 +127,6 @@ impl<C> SocksConnector<C> {
         use std::sync::Arc;
 
         let config = ClientConfig::builder()
-            .with_safe_defaults()
             .with_root_certificates(root_store)
             .with_no_client_auth();
 
@@ -137,7 +140,7 @@ impl<C> SocksConnector<C> {
 impl<C> SocksConnector<C>
 where
     C: Service<Uri>,
-    C::Response: AsyncRead + AsyncWrite + Send + Unpin,
+    C::Response: Read + Write + Send + Unpin,
     C::Error: Into<BoxedError>,
 {
     async fn call_async(mut self, target_addr: Uri) -> Result<C::Response, Error> {
@@ -160,16 +163,16 @@ where
             .call(self.proxy_addr)
             .await
             .map_err(Into::<BoxedError>::into)?;
-        let mut buf_stream = BufStream::new(stream); // fixes issue #3
+        let mut buf_stream = BufStream::new(TokioIo::new(stream)); // fixes issue #3
         let _ = async_socks5::connect(&mut buf_stream, target_addr, self.auth).await?;
-        Ok(buf_stream.into_inner())
+        Ok(buf_stream.into_inner().into_inner())
     }
 }
 
 impl<C> Service<Uri> for SocksConnector<C>
 where
     C: Service<Uri> + Clone + Send + 'static,
-    C::Response: AsyncRead + AsyncWrite + Send + Unpin,
+    C::Response: Read + Write + Send + Unpin,
     C::Error: Into<BoxedError>,
     C::Future: Send,
 {
@@ -191,7 +194,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hyper::{client::HttpConnector, Body, Client};
+    use bytes::Bytes;
+    use http_body_util::Empty;
+    use hyper_util::{
+        client::legacy::{connect::HttpConnector, Client},
+        rt::TokioExecutor,
+    };
 
     const PROXY_ADDR: &str = "socks5://127.0.0.1:1080";
     const PROXY_USERNAME: &str = "hyper";
@@ -245,10 +253,12 @@ mod tests {
             };
 
             let fut = if (self.uri.scheme() == Some(&Scheme::HTTP)) ^ self.swap_connector {
-                Client::builder().build::<_, Body>(socks).get(self.uri)
+                Client::builder(TokioExecutor::new())
+                    .build::<_, Empty<Bytes>>(socks)
+                    .get(self.uri)
             } else {
-                Client::builder()
-                    .build::<_, Body>(socks.with_tls().unwrap())
+                Client::builder(TokioExecutor::new())
+                    .build::<_, Empty<Bytes>>(socks.with_tls().unwrap())
                     .get(self.uri)
             };
             let _ = fut.await.unwrap();

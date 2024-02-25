@@ -1,5 +1,5 @@
 # hyper-socks2
-[![Build Status](https://img.shields.io/github/workflow/status/ark0f/hyper-socks2/CI)](https://github.com/ark0f/hyper-socks2/actions/)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/ark0f/hyper-socks2/ci.yml?branch=master)](https://github.com/ark0f/hyper-socks2/actions/)
 ![License](https://img.shields.io/crates/l/hyper-socks2.svg)
 [![crates.io](https://img.shields.io/crates/v/hyper-socks2.svg)](https://crates.io/crates/hyper-socks2)
 [![API docs](https://docs.rs/hyper-socks2/badge.svg)](https://docs.rs/hyper-socks2)

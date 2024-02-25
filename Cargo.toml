@@ -17,13 +17,14 @@ github-actions = { repository = "https://github.com/ark0f/hyper-socks2", workflo
 
 [dependencies]
 hyper = "1"
-async-socks5 = "0.5"
+async-socks5 = "0.6"
 futures = "0.3"
 tokio = "1.0"
 thiserror = "1.0"
 http = "1"
 tower-service = "0.3"
 hyper-util = { version = "0.1", features = ["tokio"] }
+
 # `tls` feature
 hyper-tls = { version = "0.6", optional = true }
 

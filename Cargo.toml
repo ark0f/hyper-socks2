@@ -1,6 +1,6 @@
 [package]
 name = "hyper-socks2"
-version = "0.8.0"
+version = "0.9.0"
 authors = ["Arsenii Lyashenko <arsenylyashenko.3@gmail.com>"]
 license = "Apache-2.0 OR MIT"
 description = "A SOCKS5 connector for hyper library"
@@ -10,20 +10,21 @@ readme = "README.md"
 keywords = ["hyper", "network", "ssl", "tls"]
 categories = ["authentication", "network-programming", "web-programming::http-client"]
 include = ["Cargo.toml", "LICENSE-*.md", "src/**/*"]
-edition = "2018"
+edition = "2021"
 
 [badges]
 github-actions = { repository = "https://github.com/ark0f/hyper-socks2", workflow = "CI" }
 
 [dependencies]
 hyper = "1"
-async-socks5 = "0.5"
+async-socks5 = "0.6"
 futures = "0.3"
 tokio = "1.0"
 thiserror = "1.0"
 http = "1"
 tower-service = "0.3"
 hyper-util = { version = "0.1", features = ["tokio"] }
+
 # `tls` feature
 hyper-tls = { version = "0.6", optional = true }
 

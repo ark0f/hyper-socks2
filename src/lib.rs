@@ -35,10 +35,6 @@ compile_error!(
 );
 
 use async_socks5::AddrKind;
-use futures::{
-    ready,
-    task::{Context, Poll},
-};
 use http::uri::Scheme;
 use hyper::{
     rt::{Read, Write},
@@ -49,7 +45,12 @@ use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
 use hyper_util::rt::TokioIo;
-use std::{future::Future, io, pin::Pin};
+use std::{
+    future::Future,
+    io,
+    pin::Pin,
+    task::{ready, Context, Poll},
+};
 use tokio::io::BufStream;
 use tower_service::Service;
 

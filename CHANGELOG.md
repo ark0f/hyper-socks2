@@ -1,5 +1,9 @@
 Format: # vX.X.X (YYYY-MM-DD)
 
+# v0.9.1 (2024-03-09)
+
+Replace futures crate with standard library (#17)
+
 # v0.9.0 (2024-02-26)
 
 Update MSRV to 1.75.0 and dependencies

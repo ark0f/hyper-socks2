@@ -4,9 +4,14 @@
 //! ```no_run
 //! # use std::error::Error;
 //! # fn hidden() -> Result<(), Box<dyn Error>> {
-//! use hyper::{Body, Uri};
-//! use hyper::client::{Client, HttpConnector};
+//! use bytes::Bytes;
+//! use http_body_util::Full;
+//! use hyper::Uri;
 //! use hyper_socks2::SocksConnector;
+//! use hyper_util::{
+//!     client::legacy::{connect::HttpConnector, Client},
+//!     rt::TokioExecutor,
+//! };
 //!
 //! let mut connector = HttpConnector::new();
 //! connector.enforce_http(false);
@@ -19,7 +24,7 @@
 //! // with TLS support
 //! let proxy = proxy.with_tls()?;
 //!
-//! let client = Client::builder().build::<_, Body>(proxy);
+//! let client = Client::builder(TokioExecutor::new()).build::<_, Full<Bytes>>(proxy);
 //!
 //! # Ok(())
 //! # }

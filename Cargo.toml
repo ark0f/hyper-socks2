@@ -28,9 +28,8 @@ hyper-util = { version = "0.1", features = ["tokio"] }
 hyper-tls = { version = "0.6", optional = true }
 
 # `rustls` feature
-hyper-rustls = { version = "0.26", optional = true }
-rusttls = { package = "rustls", version = "0.22", optional = true }
-rustls-native-certs = { version = "0.7", optional = true }
+rusttls = { package = "rustls", version = "0.23", default-features = false, optional = true }
+hyper-rustls = { version = "0.27", default-features = false, optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["macros"] }
@@ -40,5 +39,15 @@ bytes = "1"
 
 [features]
 default = ["tls"]
-tls = ["hyper-tls"]
-rustls = ["hyper-rustls", "rusttls", "rustls-native-certs"]
+tls = ["dep:hyper-tls"]
+# for compatibility
+rustls = ["rustls-native-roots"]
+_rustls = ["dep:rusttls", "dep:hyper-rustls", "hyper-rustls?/http1", "tls12", "logging", "aws-lc-rs"]
+rustls-native-roots = ["_rustls", "hyper-rustls?/native-tokio"]
+rustls-webpki-roots = ["_rustls", "hyper-rustls?/webpki-tokio"]
+# only available for hyper-rustls
+tls12 = ["rusttls?/tls12", "hyper-rustls?/tls12"]
+logging = ["rusttls?/logging", "hyper-rustls?/logging"]
+aws-lc-rs = ["rusttls?/aws-lc-rs", "hyper-rustls?/aws-lc-rs"]
+fips = ["rusttls?/fips", "hyper-rustls?/fips"]
+ring = ["rusttls?/ring", "hyper-rustls?/ring"]

@@ -34,7 +34,7 @@
 //! * `tls` feature is enabled by default. It adds TLS support using `hyper-tls`.
 //! * `rustls` feature adds TLS support using `hyper-rustls`.
 
-#[cfg(all(feature = "tls", feature = "rustls"))]
+#[cfg(all(feature = "tls", feature = "_rustls"))]
 compile_error!(
     "`tls` and `rustls` features are mutually exclusive. You should enable only one of them"
 );
@@ -45,7 +45,7 @@ use hyper::{
     rt::{Read, Write},
     Uri,
 };
-#[cfg(feature = "rustls")]
+#[cfg(feature = "_rustls")]
 use hyper_rustls::HttpsConnector;
 #[cfg(feature = "tls")]
 use hyper_tls::HttpsConnector;
@@ -112,19 +112,28 @@ impl<C> SocksConnector<C> {
     }
 
     /// Create a new connector with TLS support
-    #[cfg(feature = "rustls")]
+    #[cfg(feature = "_rustls")]
     pub fn with_tls(self) -> Result<HttpsConnector<Self>, io::Error> {
-        let mut root_store = rusttls::RootCertStore::empty();
-        for cert in rustls_native_certs::load_native_certs()? {
-            root_store
-                .add(cert)
-                .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err))?;
-        }
-        Ok(self.with_rustls_root_cert_store(root_store))
+        use hyper_rustls::ConfigBuilderExt as _;
+        use rusttls::ClientConfig;
+        use std::sync::Arc;
+
+        let config = ClientConfig::builder();
+
+        #[cfg(feature = "rustls-webpki-roots")]
+        let config = config.with_webpki_roots();
+
+        #[cfg(feature = "rustls-native-roots")]
+        let config = config.with_native_roots()?;
+
+        let config = Arc::new(config.with_no_client_auth());
+
+        let args = (self, config);
+        Ok(HttpsConnector::from(args))
     }
 
     /// Create a new connector with TLS support using cert store
-    #[cfg(feature = "rustls")]
+    #[cfg(feature = "_rustls")]
     pub fn with_rustls_root_cert_store(
         self,
         root_store: rusttls::RootCertStore,
